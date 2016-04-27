@@ -1,5 +1,5 @@
-% script to copy all .info.xml from Z:\ to N:\, in corresponding folder.
-% Change path and xml_path to the folder that is going to be copied
+% script: copy all .info.xml from Z:\ to N:\, in corresponding folder.
+% Change the path and xml_path to the folder that is going to be copied
 %
 % 
 % 

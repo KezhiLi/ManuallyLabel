@@ -1,4 +1,5 @@
-%
+% Read many .avi in a row, and then generate smaller .avi and .tif files
+% based on them. 
 %
 %
 %
@@ -27,8 +28,8 @@ root_folder = genpath([root,'.']);
 file=dir([root,'*.avi']);
 num_file = size(file,1);
 
-for nf = 1:100;
-    %name = '247 JU438 on food L_2011_03_07__12_53___3___7';
+for nf = 1:num_file;
+    % end-4 because to delete '.avi'
     name  = file(nf).name(1:end-4);
     input_file = [root,name, '.avi'];
     input_file_com = ['"' input_file '"'];
@@ -55,44 +56,18 @@ for nf = 1:100;
     mkdir([curr_root,'_tif']);
     mkdir([curr_root,'_avi']);
     
-    
     for nn = 1:vv;
         %% generate number of vv videos
         output_file = [curr_root,'_avi', '\',name, '(',num2str(randn_start(nn)),')','.avi'];
-        %output_file = 'Users/ajaver/Desktop/SingleWormData/Worm_Videos/output.avi';
         output_file_com = ['"' output_file '"'];
-        
         
         cmd_cut = sprintf('%s -i %s -ss %i -c copy -t %i %s', ffmpeg, input_file_com, start_time(nn), recording_time, output_file_com);
         system(cmd_cut);
         
         %% generate tif based on the new videos
-        %   video = mmread(output_file);
-        % vidoe_output_file = VideoReader(output_file);
-        
-        % VR = VideoReader(output_file);
-        % vr_mm = mmread(output_file);
-   %     video = mmread(output_file);
-        % vr_d = videoReader_DirectShow(vidoe_output_file);
         
         vR = videoReader(output_file);
         
-%         vR_full = videoReader(input_file);
-%         next(vR);next(vR_full);
-% cur_vR = getframe(vR);
-% cur_vR_full = getframe(vR_full);
-% 
-% 
-% for jj = 1:23864;
-%     jj
-%     diff(jj) = sum(sum(rgb2gray(cur_vR-cur_vR_full)));
-%     if diff(jj)<200000
-%         jj
-%     else
-%         next(vR_full);
-%         cur_vR_full = getframe(vR_full);
-%     end
-% end
         next(vR)
         ii = 1;
         img = getframe(vR);
@@ -113,7 +88,6 @@ for nf = 1:100;
              pre_timeStamp = cur_timeStamp;
         end
            
-            
         % free memory
         vR = close(vR);
         
