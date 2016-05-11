@@ -8,13 +8,23 @@ path = ['N:\Kezhi\DataSet\AllFiles\OutSource_files\All_Label\'];
 
 root_folder = genpath([path,'.']);
 
-file=dir([path,'*.tif']);
+hdf5_path = 'N:\Kezhi\DataSet\AllFiles\MaskedVideos\nas207-1\';
+hdf5_path3 = 'N:\Kezhi\DataSet\AllFiles\MaskedVideos\nas207-3\';
+
+file=dir([path,'Tif\','*.tif']);
 num_file = size(file,1);
 
-hdf5_path = 'N:\Kezhi\DataSet\AllFiles\MaskedVideos\nas207-1\';
+% change '/' to '\' due to the difference between python and matlab
+failed_files_all = strrep(fileread('stage_problems.txt'),'/','\');
+% replace folder
+gap_sym = '\Volumes\behavgenom_archive$';
+
+ini_loc = strfind(failed_files_all,gap_sym);
+
+
 
 % go through all .tif files
-for nf = 1: num_file;
+for nf = 356: num_file;
     
     hdf5_file =[];
     
@@ -23,9 +33,17 @@ for nf = 1: num_file;
       tif_file = file(nf).name(1:end-4);
       if tif_file(end-1)=='-'
           tif_file = tif_file(1:end-2);
+      elseif tif_file(end-2)=='-'
+          tif_file = tif_file(1:end-3);    
       end
-    
-    hdf5_file = subdir([hdf5_path, '*',tif_file,'.hdf5']);
+    try
+        hdf5_file = subdir([hdf5_path, '*',tif_file,'.hdf5']);
+    catch ME
+         fileID = fopen('files_in_3.txt','a');
+         fprintf(fileID,'%s ',tif_file);
+         fclose(fileID);
+         continue;
+    end
     if isempty(hdf5_file.name)
          fileID = fopen('files_not_found.txt','a');
          fprintf(fileID,'%s ',tif_file);
@@ -40,7 +58,10 @@ for nf = 1: num_file;
                normalize_val = 1000;
         
         if frame_total~=length(time_pos)
-            sprinf('frame number is not equal to number of time stamps');
+                sprintf('frame number is not equal to number of time stamps');
+                fileID = fopen('files_frame_num.txt','a');
+                fprintf(fileID,'%s ',tif_file);
+                fclose(fileID);
         end
         
         cur_mask = h5read(hdf5_file.name,'/mask');

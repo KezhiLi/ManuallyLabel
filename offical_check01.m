@@ -14,17 +14,18 @@ path = 'C:\Kezhi\MyCode!!!\ManualVideos\';
 % please add the folder name here
 addpath(genpath([path,'.']));
 
-root = 'C:\Kezhi\Videos\ReadyForLable\Andre\03-03-11\';
-folder_name = '247 JU438 on food L_2011_03_03__11_18___3___1';
+root = 'N:\Kezhi\DataSet\AllFiles\OutSource_files\N20160425\WJL\';
+folder_name = '20160425\20160425';
 
 file=dir([root,folder_name,'\','*).tif']);
 file_xls = dir([root,folder_name,'\','*).xlsx']);
 
 num_file = size(file,1);
-for nf = 1:2;
+for nf = 1:1;
     %nf = 1;
 
     file_root = [root,folder_name,'\',file(nf).name];
+    gray_root = [root,'\',file(nf).name];
     info = imfinfo(file_root);
     num_images = numel(info);
 
@@ -36,7 +37,8 @@ for nf = 1:2;
     end
 
      for k = 1:num_images;
-        A = imread(file_root, k);
+        %A = imread(file_root, k);
+        A = imread(gray_root, k);
         mm = k *2 -1;
        figure(10), imshow(A);
        hold on
