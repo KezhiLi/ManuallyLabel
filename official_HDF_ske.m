@@ -1,5 +1,5 @@
 % Input: original .hdf5 file (grey image) correspoinding to labeled files
-% Output: binary image/skeleton by using segworm
+% Output: skeleton by using segworm
 % 
 % 
 % 
@@ -14,6 +14,7 @@ path = ['X:\Kezhi\DataSet\AllFiles\OutSource_files\All_Label\'];
 
 root_folder = genpath([path,'.']);
 
+% hdf5 path: most of them are in hdf5_path, some of them are in hdf5_path3
 hdf5_path = 'X:\Kezhi\DataSet\AllFiles\MaskedVideos\nas207-1\';
 hdf5_path3 = 'X:\Kezhi\DataSet\AllFiles\MaskedVideos\nas207-3\';
 
@@ -45,13 +46,14 @@ for nf = 1: num_file;
     try
         hdf5_file = subdir([hdf5_path, '*',tif_file,'.hdf5']);
     catch ME
-         fileID = fopen('files_in_3.txt','a');
-         fprintf(fileID,'%s ',tif_file);
-         fclose(fileID);
-         continue;
+        hdf5_file = subdir([hdf5_path3, '*',tif_file,'.hdf5']);
+%          fileID = fopen('files_in_3.txt','a');
+%          fprintf(fileID,'%s ',tif_file);
+%          fclose(fileID);
+%          continue;
     end
     if isempty(hdf5_file.name)
-         fileID = fopen('files_not_found.txt','a');
+         fileID = fopen('files_not_found_ske.txt','a');
          fprintf(fileID,'%s ',tif_file);
          fclose(fileID);
     else
@@ -65,7 +67,7 @@ for nf = 1: num_file;
         
         if frame_total~=length(time_pos)
                 sprintf('frame number is not equal to number of time stamps');
-                fileID = fopen('files_frame_num.txt','a');
+                fileID = fopen('files_frame_num_ske.txt','a');
                 fprintf(fileID,'%s ',tif_file);
                 fclose(fileID);
         end
@@ -83,6 +85,9 @@ for nf = 1: num_file;
         slice_n = 0;
         pre_timeStamp = 0;
         cur_timeStamp = 0;
+        seg_skeleton = {};
+        curr_img_name = [tif_file,'_segske','.mat'];
+        fileWrite=[path,folder,curr_img_name];
         
         for ii = 1:frame_total;
             % print current ii
@@ -96,11 +101,11 @@ for nf = 1: num_file;
                 slice_n = slice_n +1;
                 
                 worms{slice_n} = segWorm(cur_mask(:,:,ii), slice_n, normalized, verbose);
-                
                 cur_seg_img = zeros(frame_size);
+                
                 if ~isempty(worms{slice_n})
                     seg_contour = worms{slice_n}.contour.pixels;
-                    
+                    seg_skeleton{slice_n} = worms{slice_n}.skeleton.pixels;
                     for nn = 1: size(seg_contour,1)
                         cur_seg_img(seg_contour(nn,1),seg_contour(nn,2)) = 1;
                     end
@@ -110,18 +115,22 @@ for nf = 1: num_file;
                     %figure, imshow(cur_seg_img_fl');
                 else
                     cur_seg_img_fl = cur_seg_img;
+                    seg_skeleton{slice_n} = 1;
                 end
                 
-                if (ii == 1)
-                    curr_img_name = [tif_file,'_seg','.tif'];
-                    imwrite(cur_seg_img_fl',[path,folder,curr_img_name]);
-                else
-                    imwrite(cur_seg_img_fl',[path,folder,curr_img_name],'WriteMode','append');
-                end
+%                 if (ii == 1)
+%                     curr_img_name = [tif_file,'_seg','.tif'];
+%                     imwrite(cur_seg_img_fl',[path,folder,curr_img_name]);
+%                 else
+%                     imwrite(cur_seg_img_fl',[path,folder,curr_img_name],'WriteMode','append');
+%                 end
                 
             end
         end
-        
+        if exist(fileWrite)
+            delete(fileWrite);
+        end
+        save(fileWrite,'seg_skeleton');
         
     end
 end    
